@@ -16,9 +16,13 @@ def clear_cache():
 
 def read_urls() -> dict:
     url_list_file = "solutions_urls.json"
-    with open(url_list_file, 'r') as r:
-        urls = json.load(r)
-    return urls
+    return read_json(url_list_file)
+
+def read_json(file):
+    with open(file, 'r') as r:
+        json_data = json.load(r)
+    return json_data
+
 class Main_downloader():
     def __init__(self) -> None:
         self.contents_urls = read_urls()
@@ -27,6 +31,9 @@ class Main_downloader():
 
     def main(self):
         self.download_all_contents_files()
+        parser = Main_parser()
+        parser.get_all_single_links()
+
 
     def download_all_contents_files(self):
         for name,url in self.contents_urls.items():    
@@ -101,6 +108,10 @@ class Main_parser():
       self.contents_urls = read_urls()
       self.single_urls = {}
 
+    def main(self):
+        self.get_all_single_links()
+        print()
+
     def load_html(self,filename):
         with open(filename, 'r') as f:
             return f.read()
@@ -111,30 +122,48 @@ class Main_parser():
         return html
     
     def get_all_single_links(self):
-        # self.get_single_urls_cbsol()
-        self.get_get_single_urls_automedon()
-        pass
+        names = list(self.contents_urls.keys())
+        for name in names:
+            if name == 'cbsol':
+                singles = self.get_single_names_from_html(name)
+            else:
+                singles = self.get_single_urls_from_json(name)
+            self.single_urls[name] = singles
 
-    def get_single_names_automedon(self):
-        html_contents = './cache/html/automedon/contents.html'
-        html  = self.parse_html(html_contents)
-
-    def  get_get_single_urls_automedon(self):
-        names = self.get_single_names_cbsol()
+    def get_single_urls_from_json(self,name):
+        json_file = f'./cache/json/{name}/contents.json'
+        pages, sub_contents = self.parse_json_contents(json_file)
+        return pages
+    
+    def parse_json_contents(self,json_file):            
+        pages = {}
+        sub_contents = {}
+        json_data = read_json(json_file)
+        for item in json_data:
+            name = item['name']
+            url = item['download_url']
+            if item['type'] == 'file':
+                pages[name] = url
+            else:
+                sub_contents[name] = url
+        print(f'{json_file} has {len(pages)} pages and {len(sub_contents)} sub_contents')
+        return pages, sub_contents
 
     def get_single_urls_cbsol(self):
         # names = self.get_single_names_cbsol()
         pass
     
-    def get_single_names_cbsol(self):
-        html_contents = './cache/html/cbsol/contents.html'
-        # base_url = self.main_urls['cbsol']
-        html  = self.parse_html(html_contents)
-        raw_links = html.find_all('a', class_='relative')[3:]
+    def get_single_names_from_html(self,name):
+        html_contents = f'./cache/html/{name}/contents.html'
+        html_parsed  = self.parse_html(html_contents)
+        if name == 'cbsol':
+            clean_links = self.parse_cbsol_html(html_parsed)
+        return clean_links
+
+    def parse_cbsol_html(self,html_parsed):
+        raw_links = html_parsed.find_all('a', class_='relative')[3:]
         clean_links = [link.attrs['href'] for link in raw_links]
         return clean_links
-        # full_links = [base_url+url for url in clean_links]
-        # self.single_urls['cbsol'] = full_links
 
     def single_page_content_cbsol(self):
         full_path = './cache/html/cbsol/1.html'     
@@ -152,12 +181,14 @@ class Main_parser():
         # print(gists[0]['files'].keys(),gists[0]['files']['raw_url'])
 
 if __name__ == '__main__':
-    clear_cache()
-    downloader = Main_downloader()
-    downloader.main()
-    downloader.download_all_contents_files()
+    # clear_cache()
+    # downloader = Main_downloader()
+    # downloader.main()
+
+    # downloader.download_all_contents_files()
     # downloader.download_gist()
-    # parser = Main_parser()
+    parser = Main_parser()
+    parser.main()
     # parser.get_all_single_links()
     # downloader.download_all_singles(parser.single_urls,3)
     # parser.single_page_content_cbsol()
