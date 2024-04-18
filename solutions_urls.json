@@ -1,7 +1,7 @@
 {
     "cbsol":"https://www.cssbattlesolutions.com/",
-    "automedon":"https://github.com/Automedon/cssbattle.dev",
-    "ngekoding":"https://github.com/ngekoding/cssbattle",
-    "tuserSheikh":"https://github.com/TuserSheikh/cssbattle"
+    "automedon":"https://api.github.com/repos/Automedon/cssbattle.dev/contents",
+    "ngekoding":"https://api.github.com/repos/ngekoding/cssbattle/contents/solutions",
+    "tuserSheikh":"https://api.github.com/repos/TuserSheikh/cssbattle/contents/battles"
 
 }
